@@ -1,6 +1,5 @@
 package com.atlasindex.controller;
 
-import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.ResponseEntity;
@@ -28,10 +27,6 @@ public class TestController {
         HttpServletRequest request,
         @RequestParam Long playerId
     ) {
-        Enumeration<String> headers = request.getHeaderNames();
-        while (headers.hasMoreElements()) {
-            System.out.println(headers.nextElement());
-        }
         if (results.containsValue(dto.sessionId())) {
             return ResponseEntity.ok("Match registered, Code: %s".formatted(dto.sessionId()));
         } else {
