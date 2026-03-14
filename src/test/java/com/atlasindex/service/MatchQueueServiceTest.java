@@ -45,7 +45,7 @@ public class MatchQueueServiceTest {
                 )
             ),
             sessionId,
-            new MatchTimersDTO(10000, 800, 20),
+            new MatchTimersDTO(800, 20),
             null);
     }
 
