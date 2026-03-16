@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResponseDTO;
 import com.atlasindex.model.dto.MatchResultDTO;
@@ -31,21 +32,22 @@ public class MatchController {
 
     @GetMapping
     public ResponseEntity<List<MatchResponseDTO>> findAll(
-        @RequestParam(required = false) Long playerId
-    ) {
+            @RequestParam(required = false) Long playerId) {
         return ResponseEntity.ok(playerId == null
-            ? service.findAll() : service.findAllByPlayerId(playerId)
-        );
+                ? service.findAll()
+                : service.findAllByPlayerId(playerId));
     }
 
     @PostMapping
-    public ResponseEntity<?> save(
-        @Valid @RequestBody MatchResultDTO dto,
-        @RequestParam Long playerId // TODO: implement Authentication instead
+    public DeferredResult<ResponseEntity<?>> submitMatch(
+            @Valid @RequestBody MatchResultDTO dto,
+            @RequestParam Long playerId // TODO: implement Authentication instead
     ) {
-        queueService.reportMatch(dto, playerId);
-        System.out.println(playerId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>(10_000L,
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Match confirmation timeout"));
+
+        queueService.reportMatch(dto, playerId, result);
+        return result;
     }
 
 }

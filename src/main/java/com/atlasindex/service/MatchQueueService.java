@@ -3,8 +3,11 @@ package com.atlasindex.service;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
 
@@ -24,30 +27,33 @@ public class MatchQueueService {
             .removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
     }
 
-    public void reportMatch(MatchResultDTO dto, long senderId) {
+    public void reportMatch(MatchResultDTO dto, long senderId, DeferredResult<ResponseEntity<?>> deferred) {
         var sessionId = dto.sessionId();
         var existing = pendingReports.remove(sessionId);
 
         if (existing != null) {
             // Second report has arrived
 
+            ResponseEntity<?> response;
             // sender pos == 1 -> sender is P1
             if (dto.senderPosition() == 1) {
                 matchService.registerMatch(dto, senderId, existing.senderId());
             } else {
                 matchService.registerMatch(dto, existing.senderId(), senderId);
             }
-            System.out.println("Match reported: " + sessionId);
+            response = ResponseEntity.status(HttpStatus.CREATED).body("Match registered");
+
+            existing.deferred().setResult(response);
+            deferred.setResult(response);
         } else {
-            System.out.println("Pending match: " + sessionId);
-            pendingReports.put(sessionId, PendingReport.from(dto, senderId));
+            pendingReports.put(sessionId, PendingReport.from(dto, senderId, deferred));
         }
     }
 
     /** Stores players match submissions to compare them later on */
-    record PendingReport(MatchResultDTO dto, Long senderId, Instant expiresAt) {
-        public static PendingReport from(MatchResultDTO dto, Long senderId) {
-            return new PendingReport(dto, senderId, Instant.now().plusSeconds(10));
+    record PendingReport(MatchResultDTO dto, Long senderId, Instant expiresAt, DeferredResult<ResponseEntity<?>> deferred) {
+        public static PendingReport from(MatchResultDTO dto, Long senderId, DeferredResult<ResponseEntity<?>> deferred) {
+            return new PendingReport(dto, senderId, Instant.now().plusSeconds(10), deferred);
         }
     }
 }

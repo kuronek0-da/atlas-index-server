@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
 import com.atlasindex.model.dto.MatchTimersDTO;
@@ -55,7 +57,7 @@ public class MatchQueueServiceTest {
     void firstReport_isQueued_matchServiceNotCalled() {
         var dto = buildDTO("session-1", 1);
 
-        service.reportMatch(dto, 100L);
+        service.reportMatch(dto, 100L, new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build()));
         assertEquals(service.pendingReports.size(), 1);
         verifyNoInteractions(matchService);
     }
@@ -65,9 +67,10 @@ public class MatchQueueServiceTest {
         var session = "session-1";
         var dto1 = buildDTO(session, 1);
         var dto2 = buildDTO(session, 2);
+        var deferred = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
 
-        service.reportMatch(dto1, 100L);
-        service.reportMatch(dto2, 200L);
+        service.reportMatch(dto1, 100L, deferred);
+        service.reportMatch(dto2, 200L, deferred);
 
         verify(matchService, times(1)).registerMatch(any(), anyLong(), anyLong());
         assertTrue(service.pendingReports.isEmpty()); // Empty
@@ -81,8 +84,9 @@ public class MatchQueueServiceTest {
         var dto1 = buildDTO(session1, 1);
         var dto2 = buildDTO(session2, 1);
 
-        service.reportMatch(dto1, 20L);
-        service.reportMatch(dto2, 30L);
+        var deferred = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
+        service.reportMatch(dto1, 20L, deferred);
+        service.reportMatch(dto2, 30L, deferred);
 
         assertEquals(service.pendingReports.size(), 2);
         verifyNoInteractions(matchService);
@@ -92,9 +96,10 @@ public class MatchQueueServiceTest {
 
     @Test
     void expiredReport_isRemovedByCleanup() {
+        var deferred = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
         var expiredReport = new PendingReport(
             buildDTO("session-1", 1), 
-            10L, Instant.now().minusSeconds(60));
+            10L, Instant.now().minusSeconds(60), deferred);
         
         service.pendingReports.put("session-1", expiredReport);
         service.clearExpiredReports();
@@ -104,8 +109,9 @@ public class MatchQueueServiceTest {
 
     @Test
     void nonExpiredReport_isKeptByCleanup() {
+        var deferred = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
         var expiredReport = PendingReport.from(
-            buildDTO("session-2", 1), 2L);
+            buildDTO("session-2", 1), 2L, deferred);
         
         service.pendingReports.put("session-2", expiredReport);
         service.clearExpiredReports();
