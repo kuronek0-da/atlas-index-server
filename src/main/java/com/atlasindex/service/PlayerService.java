@@ -1,6 +1,9 @@
 package com.atlasindex.service;
 
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.atlasindex.model.dto.PlayerDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.repository.PlayerRepository;
+import com.atlasindex.util.Sha256Util;
 
 @Service
 public class PlayerService {
@@ -22,7 +26,8 @@ public class PlayerService {
             .map((p) -> new PlayerDTO(
                 p.getId(),
                 p.getDiscordId(),
-                p.getDiscordUsername())).toList();
+                p.getDiscordUsername()
+            )).toList();
     }
 
     public PlayerDTO findById(Long id) {
@@ -33,10 +38,23 @@ public class PlayerService {
     }
 
     @Transactional
-    public void save(PlayerDTO dto) {
+    public String register(PlayerDTO dto) {
         Player p = new Player();
+        String token = UUID.randomUUID().toString();
+        String hash;
+        try {
+            hash = Sha256Util.hashData(token);
+        } catch(NoSuchAlgorithmException e) {
+            throw new RuntimeException("Could not hash token.");
+        }
+
         p.setDiscordId(dto.discordId());
         p.setDiscordUsername(dto.discordUsername());
+        p.setToken(hash);
+        p.setCreatedAt(Instant.now());
+        p.setLastSeenAt(Instant.now());
+
         repository.save(p);
+        return token;
     }
 }

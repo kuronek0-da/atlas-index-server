@@ -14,9 +14,11 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResponseDTO;
 import com.atlasindex.model.dto.MatchResultDTO;
+import com.atlasindex.model.entities.Player;
 import com.atlasindex.service.MatchQueueService;
 import com.atlasindex.service.MatchService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -41,12 +43,13 @@ public class MatchController {
     @PostMapping
     public DeferredResult<ResponseEntity<?>> submitMatch(
             @Valid @RequestBody MatchResultDTO dto,
-            @RequestParam Long playerId // TODO: implement Authentication instead
+            HttpServletRequest request
     ) {
+        Player player = (Player) request.getAttribute("player");
         DeferredResult<ResponseEntity<?>> result = new DeferredResult<>(10_000L,
                 ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Match confirmation timeout"));
 
-        queueService.reportMatch(dto, playerId, result);
+        queueService.reportMatch(dto, player, result);
         return result;
     }
 

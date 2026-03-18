@@ -39,9 +39,7 @@ public class MatchService {
     }
 
     @Transactional
-    public void registerMatch(MatchResultDTO dto, Long p1Id, Long p2Id) {
-        Player p1 = playerRepository.getReferenceById(p1Id);
-        Player p2 = playerRepository.getReferenceById(p2Id);
+    public void registerMatch(MatchResultDTO dto, Player p1, Player p2) {
         var savedMatch = repository.save(MatchResultMapper.toEntity(dto, p1, p2));
         charService.updateRatings(savedMatch);
     }
