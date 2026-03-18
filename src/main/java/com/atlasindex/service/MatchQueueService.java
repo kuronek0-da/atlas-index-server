@@ -34,14 +34,13 @@ public class MatchQueueService {
         if (existing != null) {
             // Second report has arrived
 
-            ResponseEntity<?> response;
             // sender pos == 1 -> sender is P1
             if (dto.senderPosition() == 1) {
                 matchService.registerMatch(dto, senderId, existing.senderId());
             } else {
                 matchService.registerMatch(dto, existing.senderId(), senderId);
             }
-            response = ResponseEntity.status(HttpStatus.CREATED).body("Match registered");
+            var response = ResponseEntity.status(HttpStatus.CREATED).body("Match registered");
 
             existing.deferred().setResult(response);
             deferred.setResult(response);

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
 
@@ -22,17 +23,20 @@ public class TestController {
     final ConcurrentHashMap<Long, String> results = new ConcurrentHashMap<>();
 
     @PostMapping("/api/match")
-    public ResponseEntity<?> testMatchingResults(
+    public DeferredResult<ResponseEntity<?>> testMatchingResults(
         @Valid @RequestBody MatchResultDTO dto,
         HttpServletRequest request,
         @RequestParam Long playerId
     ) {
+        var result = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408));
+
         if (results.containsValue(dto.sessionId())) {
-            return ResponseEntity.ok("Match registered, Code: %s".formatted(dto.sessionId()));
+            result.setResult(ResponseEntity.status(201).body("Match registered, Code: %s".formatted(dto.sessionId())));
+            return result;
         } else {
             results.put(playerId, dto.sessionId());
         }
-        return ResponseEntity.ok("Pending match report.");
+        return result;
     }
 
     @GetMapping("/clear")

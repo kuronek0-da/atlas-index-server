@@ -19,9 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
-import com.atlasindex.model.dto.MatchTimersDTO;
 import com.atlasindex.model.dto.PlayerMCDTO;
-import com.atlasindex.model.dto.PlayersMCDTO;
 import com.atlasindex.model.enums.GameChar;
 import com.atlasindex.model.enums.Moon;
 import com.atlasindex.service.MatchQueueService.PendingReport;
@@ -37,17 +35,15 @@ public class MatchQueueServiceTest {
     // Helper
     private MatchResultDTO buildDTO(String sessionId, int senderPosition) {
         return new MatchResultDTO(
-            senderPosition, 
-            new PlayersMCDTO(
-                new PlayerMCDTO(
-                    GameChar.ARC, Moon.CRESCENT, 2
-                ),
-                new PlayerMCDTO(
-                    GameChar.NERO, Moon.FULL, 1
-                )
+            senderPosition,
+            new PlayerMCDTO(
+                GameChar.ARC, Moon.CRESCENT, 2
+            ),
+            new PlayerMCDTO(
+                GameChar.NERO, Moon.FULL, 1
             ),
             sessionId,
-            new MatchTimersDTO(800, 20),
+            4000,
             null);
     }
 
