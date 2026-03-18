@@ -17,15 +17,15 @@ public class MatchResultMapper {
 
         m.setP1(p1);
 
-        m.setP1Char(dto.players().p1().character());
-        m.setP1Moon(dto.players().p1().moon());
-        m.setP1Score(dto.players().p1().score());
+        m.setP1Char(dto.p1().character());
+        m.setP1Moon(dto.p1().moon());
+        m.setP1Score(dto.p1().score());
         
         m.setP2(p2);
 
-        m.setP2Char(dto.players().p2().character());
-        m.setP2Moon(dto.players().p2().moon());
-        m.setP2Score(dto.players().p2().score());
+        m.setP2Char(dto.p2().character());
+        m.setP2Moon(dto.p2().moon());
+        m.setP2Score(dto.p2().score());
         
         m.setPlayedAt(Instant.now());
 

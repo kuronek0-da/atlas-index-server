@@ -10,11 +10,13 @@ public record MatchResultDTO(
     @NotNull
     Integer senderPosition,
     @NotNull
-    PlayersMCDTO players,
+    PlayerMCDTO p1,
+    @NotNull
+    PlayerMCDTO p2,
     @NotNull
     String sessionId,
     @NotNull
-    MatchTimersDTO timers,
+    Integer realTimer,
     @NotNull
     Long timestamp
 ) {

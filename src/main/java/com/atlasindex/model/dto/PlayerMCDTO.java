@@ -5,6 +5,7 @@ import com.atlasindex.model.enums.Moon;
 
 import jakarta.validation.constraints.NotNull;
 
+/** Player Moon-Character DTO */
 public record PlayerMCDTO(
     @NotNull
     GameChar character,
