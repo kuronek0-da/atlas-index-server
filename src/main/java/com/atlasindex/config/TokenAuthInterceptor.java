@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.atlasindex.repository.PlayerRepository;
+import com.atlasindex.service.PlayerService;
 import com.atlasindex.util.Sha256Util;
 
 import jakarta.servlet.DispatcherType;
@@ -17,10 +17,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 /** Intercepts requests to get the Player from the Bearer token */
 public class TokenAuthInterceptor implements HandlerInterceptor {
-    private final PlayerRepository playerRepository;
+    private final PlayerService playerService;
 
-    public TokenAuthInterceptor(PlayerRepository playerRepository) {
-        this.playerRepository = playerRepository;
+    public TokenAuthInterceptor(PlayerService playerRepository) {
+        this.playerService = playerRepository;
     }
 
     @Override
@@ -48,16 +48,16 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        var player = playerRepository.findByToken(hashed).orElse(null);
+        var player = playerService.findByToken(hashed).orElse(null);
         if (player == null || player.isTokenExpired()) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
 
         if ((player.getLastSeenAt().isBefore(Instant.now().minus(24, ChronoUnit.HOURS)))) {
-            player.setLastSeenAt(Instant.now());
-            playerRepository.save(player);
+            playerService.renewTokenExpiration(player);
         }
+
         request.setAttribute("player", player);
         return true;
     }

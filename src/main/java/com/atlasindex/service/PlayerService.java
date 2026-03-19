@@ -3,8 +3,11 @@ package com.atlasindex.service;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,11 @@ public class PlayerService {
         return new PlayerDTO(p.getId(), p.getDiscordId(), p.getDiscordUsername());
     }
 
+    @Cacheable(value = "playerByToken")
+    public Optional<Player> findByToken(String hashedToken) {
+        return repository.findByToken(hashedToken);
+    }
+
     @Transactional
     public String register(PlayerDTO dto) {
         Player p = new Player();
@@ -56,5 +64,12 @@ public class PlayerService {
 
         repository.save(p);
         return token;
+    }
+
+    @Transactional
+    @CacheEvict(value = "playerByToken")
+    public void renewTokenExpiration(Player p) {
+        p.setLastSeenAt(Instant.now());
+        repository.save(p);
     }
 }
