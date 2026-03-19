@@ -27,13 +27,13 @@ public class MatchService {
     }
 
     public List<MatchResponseDTO> findAll() {
-        return repository.findAll().stream()
+        return repository.findAllMatches().stream()
             .map(MatchResultMapper::toResponse)
             .toList();
     }
 
     public List<MatchResponseDTO> findAllByPlayerId(Long playerId) {
-        return repository.findAllByP1IdOrP2Id(playerId, playerId).stream()
+        return repository.findAllMatchesByPlayerId(playerId).stream()
             .map(MatchResultMapper::toResponse)
             .toList();
     }

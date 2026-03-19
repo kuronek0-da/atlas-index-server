@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
-import com.atlasindex.model.dto.PlayerMCDTO;
+import com.atlasindex.model.dto.MoonCharDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.model.enums.GameChar;
 import com.atlasindex.model.enums.Moon;
@@ -36,10 +36,10 @@ public class MatchQueueServiceTest {
     private MatchResultDTO buildDTO(String sessionId, int senderPosition) {
         return new MatchResultDTO(
             senderPosition,
-            new PlayerMCDTO(
+            new MoonCharDTO(
                 GameChar.ARC, Moon.CRESCENT, 2
             ),
-            new PlayerMCDTO(
+            new MoonCharDTO(
                 GameChar.NERO, Moon.FULL, 1
             ),
             sessionId,

@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +25,7 @@ public class RankedMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Player p1;
     @Enumerated(EnumType.ORDINAL)
@@ -36,7 +37,7 @@ public class RankedMatch {
     @Column(nullable = false)
     private int p1Score;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Player p2;
     // Hibernate is creating this column as character type for some reasong
@@ -130,5 +131,9 @@ public class RankedMatch {
 
     public void setPlayedAt(Instant playedAt) {
         this.playedAt = playedAt;
+    }
+
+    public boolean isP1Winner() {
+        return p1Score > p2Score;
     }
 }

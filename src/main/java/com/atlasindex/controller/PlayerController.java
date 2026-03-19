@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atlasindex.model.dto.PlayerDTO;
+import com.atlasindex.model.dto.PlayerProfileDTO;
 import com.atlasindex.model.dto.TokenResponseDTO;
 import com.atlasindex.service.PlayerService;
 
@@ -24,20 +25,20 @@ import jakarta.validation.Valid;
 public class PlayerController {
     private final PlayerService service;
     @Value("${atlas.admin.token}")
-    private String adminToken;
+    private String adminToken = "asakuratoru";
 
     public PlayerController(PlayerService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<List<PlayerDTO>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<PlayerProfileDTO>> findAllPlayerProfiles() {
+        return ResponseEntity.ok(service.findAllPlayerProfiles());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlayerDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<PlayerProfileDTO> findPlayerProfileById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findPlayerProfileById(id));
     }
 
     @PostMapping()

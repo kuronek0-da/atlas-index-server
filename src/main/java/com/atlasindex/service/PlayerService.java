@@ -12,16 +12,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.atlasindex.model.dto.PlayerDTO;
+import com.atlasindex.model.dto.PlayerProfileDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.repository.PlayerRepository;
+import com.atlasindex.repository.PlayerStatsRepository;
 import com.atlasindex.util.Sha256Util;
 
 @Service
 public class PlayerService {
     private final PlayerRepository repository;
+    private final PlayerStatsRepository playerStatsRepository;
 
-    public PlayerService(PlayerRepository repository) {
+    public PlayerService(PlayerRepository repository, PlayerStatsRepository playerStatsRepository) {
         this.repository = repository;
+        this.playerStatsRepository = playerStatsRepository;
     }
 
     public List<PlayerDTO> findAll() {
@@ -31,6 +35,15 @@ public class PlayerService {
                 p.getDiscordId(),
                 p.getDiscordUsername()
             )).toList();
+    }
+
+    public PlayerProfileDTO findPlayerProfileById(Long id) {
+        return playerStatsRepository.findPlayerProfileById(id)
+            .orElseThrow(() -> new RuntimeException("Player profile not found."));
+    }
+
+    public List<PlayerProfileDTO> findAllPlayerProfiles() {
+        return playerStatsRepository.findAllPlayerProfiles();
     }
 
     public PlayerDTO findById(Long id) {

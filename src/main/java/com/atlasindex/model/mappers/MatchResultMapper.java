@@ -4,8 +4,7 @@ import java.time.Instant;
 
 import com.atlasindex.model.dto.MatchResponseDTO;
 import com.atlasindex.model.dto.MatchResultDTO;
-import com.atlasindex.model.dto.PlayerMCDTO;
-import com.atlasindex.model.dto.PlayerResponseDTO;
+import com.atlasindex.model.dto.PlayerMoonCharDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.model.entities.RankedMatch;
 
@@ -33,14 +32,10 @@ public class MatchResultMapper {
     }
 
     public static MatchResponseDTO toResponse(RankedMatch entity) {
-        Player p1 = entity.getP1();
-        PlayerMCDTO p1MC = new PlayerMCDTO(entity.getP1Char(), entity.getP1Moon(), entity.getP1Score());
-        Player p2 = entity.getP2();
-        PlayerMCDTO p2MC = new PlayerMCDTO(entity.getP2Char(), entity.getP2Moon(), entity.getP2Score());
-
-        return new MatchResponseDTO(
-            entity.getId(),
-            new PlayerResponseDTO(p1.getDiscordUsername()), new PlayerResponseDTO(p2.getDiscordUsername()), 
-            p1MC, p2MC, entity.getPlayedAt());
+        PlayerMoonCharDTO p1 = new PlayerMoonCharDTO(
+            entity.getP1().getId(), entity.getP1().getDiscordUsername(), entity.getP1Char(), entity.getP1Moon(), entity.getP1Score());
+        PlayerMoonCharDTO p2 = new PlayerMoonCharDTO(
+            entity.getP2().getId(), entity.getP2().getDiscordUsername(), entity.getP2Char(), entity.getP2Moon(), entity.getP2Score());
+        return new MatchResponseDTO(entity.getId(), p1, p2, entity.getPlayedAt());
     }
 }

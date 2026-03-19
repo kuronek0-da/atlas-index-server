@@ -10,9 +10,9 @@ public record MatchResultDTO(
     @NotNull
     Integer senderPosition,
     @NotNull
-    PlayerMCDTO p1,
+    MoonCharDTO p1,
     @NotNull
-    PlayerMCDTO p2,
+    MoonCharDTO p2,
     @NotNull
     String sessionId,
     @NotNull
