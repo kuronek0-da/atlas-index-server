@@ -24,7 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenAuthInterceptor)
-                .addPathPatterns(List.of("**/api/match", "/auth/validate"))
+                .addPathPatterns(List.of("**/api/match", "**/api/queue", "/api/queue/*", "/auth/validate"))
                 .excludeHttpMethods(HttpMethod.GET);
     }
 }

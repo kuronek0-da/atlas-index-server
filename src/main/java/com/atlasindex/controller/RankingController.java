@@ -12,7 +12,7 @@ import com.atlasindex.model.dto.RankingDTO;
 import com.atlasindex.service.RankingService;
 
 @RestController
-@RequestMapping("api/rank")
+@RequestMapping("api/ranking")
 public class RankingController {
     private final RankingService service;
 

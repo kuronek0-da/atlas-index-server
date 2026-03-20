@@ -15,8 +15,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 import com.atlasindex.model.dto.MatchResponseDTO;
 import com.atlasindex.model.dto.MatchResultDTO;
 import com.atlasindex.model.entities.Player;
-import com.atlasindex.service.MatchQueueService;
 import com.atlasindex.service.MatchService;
+import com.atlasindex.service.ReportQueueService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,9 +25,9 @@ import jakarta.validation.Valid;
 @RequestMapping("api/match")
 public class MatchController {
     private final MatchService service;
-    private final MatchQueueService queueService;
+    private final ReportQueueService queueService;
 
-    public MatchController(MatchService service, MatchQueueService queueService) {
+    public MatchController(MatchService service, ReportQueueService queueService) {
         this.service = service;
         this.queueService = queueService;
     }

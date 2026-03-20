@@ -22,7 +22,7 @@ import com.atlasindex.model.dto.MoonCharDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.model.enums.GameChar;
 import com.atlasindex.model.enums.Moon;
-import com.atlasindex.service.MatchQueueService.PendingReport;
+import com.atlasindex.service.ReportQueueService.PendingReport;
 
 @ExtendWith(MockitoExtension.class)
 public class MatchQueueServiceTest {
@@ -30,7 +30,7 @@ public class MatchQueueServiceTest {
     private MatchService matchService;
     
     @InjectMocks
-    private MatchQueueService service;
+    private ReportQueueService service;
 
     // Helper
     private MatchResultDTO buildDTO(String sessionId, int senderPosition) {

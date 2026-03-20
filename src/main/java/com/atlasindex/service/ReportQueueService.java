@@ -13,11 +13,11 @@ import com.atlasindex.model.dto.MatchResultDTO;
 import com.atlasindex.model.entities.Player;
 
 @Service
-public class MatchQueueService {
+public class ReportQueueService {
     private final MatchService matchService;
     final ConcurrentHashMap<String, PendingReport> pendingReports = new ConcurrentHashMap<>();
 
-    public MatchQueueService(MatchService matchService) {
+    public ReportQueueService(MatchService matchService) {
         this.matchService = matchService;
     }
 
