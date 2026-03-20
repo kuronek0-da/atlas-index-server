@@ -46,7 +46,7 @@ public class MatchController {
             HttpServletRequest request
     ) {
         Player player = (Player) request.getAttribute("player");
-        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>(30_000L,
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>(60_000L,
                 ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Match confirmation timeout"));
 
         queueService.reportMatch(dto, player, result);
