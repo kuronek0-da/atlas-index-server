@@ -58,7 +58,7 @@ public class ReportQueueService {
     record PendingReport(MatchResultDTO dto, Player player, Instant expiresAt, DeferredResult<ResponseEntity<?>> deferred) {
 
         public static PendingReport from(MatchResultDTO dto, Player player, DeferredResult<ResponseEntity<?>> deferred) {
-            return new PendingReport(dto, player, Instant.now().plusSeconds(30), deferred);
+            return new PendingReport(dto, player, Instant.now().plusSeconds(60), deferred);
         }
         
     }
