@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +25,7 @@ public class Ranking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Player player;
     @Enumerated(EnumType.ORDINAL)
@@ -37,20 +38,25 @@ public class Ranking {
     private int elo;
     @Column(nullable = false)
     private int gamesPlayed;
+    @Column(nullable = false)
+    private int wins;
 
     public static Ranking newRating(Player player, GameChar character, Moon moon) {
         var r = new Ranking();
         r.setPlayer(player);
         r.setCharacter(character);
         r.setMoon(moon);
-        r.setGamesPlayed(0);
         r.setElo(1000); // Default ELO
 
         return r;
     }
 
-    public void incrementGamesPlayed() {
+    /**
+     * @param won increments the amount of wins if true
+     */
+    public void incrementGamesPlayed(boolean won) {
         this.gamesPlayed++;
+        if (won) wins++;
     }
 
     public Long getId() {
@@ -99,5 +105,13 @@ public class Ranking {
 
     public void setGamesPlayed(int gamesPlayed) {
         this.gamesPlayed = gamesPlayed;
+    }
+
+    public int getWins() {
+        return wins;
+    }
+
+    public void setWins(int wins) {
+        this.wins = wins;
     }
 }

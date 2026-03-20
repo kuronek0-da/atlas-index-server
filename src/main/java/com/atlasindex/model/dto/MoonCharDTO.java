@@ -3,14 +3,15 @@ package com.atlasindex.model.dto;
 import com.atlasindex.model.enums.GameChar;
 import com.atlasindex.model.enums.Moon;
 
-public record RankingDTO(
-    Long id,
-    Long playerId,
-    String discordUsername,
+import jakarta.validation.constraints.NotNull;
+
+/** Player Moon-Character DTO */
+public record MoonCharDTO(
+    @NotNull
     GameChar character,
+    @NotNull
     Moon moon,
-    int elo,
-    int gamesPlayed,
-    int wins
+    @NotNull
+    int score
 ) {
 }

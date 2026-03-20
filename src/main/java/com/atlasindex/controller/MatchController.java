@@ -14,18 +14,20 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResponseDTO;
 import com.atlasindex.model.dto.MatchResultDTO;
-import com.atlasindex.service.MatchQueueService;
+import com.atlasindex.model.entities.Player;
 import com.atlasindex.service.MatchService;
+import com.atlasindex.service.ReportQueueService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/match")
 public class MatchController {
     private final MatchService service;
-    private final MatchQueueService queueService;
+    private final ReportQueueService queueService;
 
-    public MatchController(MatchService service, MatchQueueService queueService) {
+    public MatchController(MatchService service, ReportQueueService queueService) {
         this.service = service;
         this.queueService = queueService;
     }
@@ -41,12 +43,13 @@ public class MatchController {
     @PostMapping
     public DeferredResult<ResponseEntity<?>> submitMatch(
             @Valid @RequestBody MatchResultDTO dto,
-            @RequestParam Long playerId // TODO: implement Authentication instead
+            HttpServletRequest request
     ) {
+        Player player = (Player) request.getAttribute("player");
         DeferredResult<ResponseEntity<?>> result = new DeferredResult<>(10_000L,
                 ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Match confirmation timeout"));
 
-        queueService.reportMatch(dto, playerId, result);
+        queueService.reportMatch(dto, player, result);
         return result;
     }
 

@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
+import com.atlasindex.model.entities.Player;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -20,29 +20,37 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/test")
 public class TestController {
-    final ConcurrentHashMap<Long, String> results = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<String, PendingResult> pendingResults = new ConcurrentHashMap<>();
 
     @PostMapping("/api/match")
     public DeferredResult<ResponseEntity<?>> testMatchingResults(
         @Valid @RequestBody MatchResultDTO dto,
-        HttpServletRequest request,
-        @RequestParam Long playerId
+        HttpServletRequest request
     ) {
-        var result = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408));
+        System.out.println("Session ID: " + dto.sessionId());
 
-        if (results.containsValue(dto.sessionId())) {
-            result.setResult(ResponseEntity.status(201).body("Match registered, Code: %s".formatted(dto.sessionId())));
+        Player player = (Player) request.getAttribute("player");
+        var result = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
+
+        if (pendingResults.containsKey(dto.sessionId())) {
+            var okRes = ResponseEntity.status(201).body("Match registered, Code: %s".formatted(dto.sessionId()));
+            result.setResult(okRes);
+            pendingResults.get(dto.sessionId()).deferred().setResult(okRes);
+            System.out.println("Found pairing result. Status: 201");
             return result;
         } else {
-            results.put(playerId, dto.sessionId());
+            pendingResults.put(dto.sessionId(), new PendingResult(dto, result));
         }
         return result;
     }
 
     @GetMapping("/clear")
     public ResponseEntity<?> clear() {
-        results.clear();
+        pendingResults.clear();
         return ResponseEntity.ok().build();
     }
     
+    record PendingResult(MatchResultDTO dto, DeferredResult<ResponseEntity<?>> deferred) {
+        
+    }
 }

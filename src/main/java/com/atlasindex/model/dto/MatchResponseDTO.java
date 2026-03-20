@@ -4,10 +4,8 @@ import java.time.Instant;
 
 public record MatchResponseDTO(
     Long matchId,
-    PlayerResponseDTO p1,
-    PlayerResponseDTO p2,
-    PlayerMCDTO p1MC,
-    PlayerMCDTO p2MC,
+    PlayerMoonCharDTO p1,
+    PlayerMoonCharDTO p2,
     Instant playedAt
 ) {
     
