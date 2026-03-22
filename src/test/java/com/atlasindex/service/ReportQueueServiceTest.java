@@ -25,7 +25,7 @@ import com.atlasindex.model.enums.Moon;
 import com.atlasindex.service.ReportQueueService.PendingReport;
 
 @ExtendWith(MockitoExtension.class)
-public class MatchQueueServiceTest {
+public class ReportQueueServiceTest {
     @Mock
     private MatchService matchService;
     
