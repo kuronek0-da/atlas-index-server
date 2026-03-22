@@ -28,6 +28,7 @@ public class TestController {
         HttpServletRequest request
     ) {
         System.out.println("Session ID: " + dto.sessionId());
+        System.out.println(dto);
 
         Player player = (Player) request.getAttribute("player");
         var result = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
