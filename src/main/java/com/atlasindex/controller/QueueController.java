@@ -1,5 +1,6 @@
 package com.atlasindex.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class QueueController {
             @RequestBody @Valid QueueRequestDTO queueRequest,
             HttpServletRequest request) {
         var player = (Player) request.getAttribute("player");
-        var result = new DeferredResult<ResponseEntity<?>>(60_000L, ResponseEntity.status(408).build());
+        var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
         service.joinQueue(player.getDiscordUsername(), queueRequest.sessionId(), result);
         return result;
     }
@@ -40,7 +41,7 @@ public class QueueController {
         HttpServletRequest request
     ) {
         var player = (Player) request.getAttribute("player");
-        var result = new DeferredResult<ResponseEntity<?>>(60_000L, ResponseEntity.status(408).build());
+        var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
 
         service.matchInQueue(player.getDiscordUsername(), sessionId, result);
         return result;
