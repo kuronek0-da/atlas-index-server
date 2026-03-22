@@ -37,6 +37,16 @@ public class ReportQueueService {
             // Second report has arrived
 
             if (existing.player().getId() == sender.getId()) {
+                var conflict = ResponseEntity.status(HttpStatus.CONFLICT).build();
+                existing.deferred().setResult(conflict);
+                deferred.setResult(conflict);
+                return;
+            }
+
+            if (dto.senderPosition() == existing.dto().senderPosition()) {
+                var conflict = ResponseEntity.status(HttpStatus.CONFLICT).build();
+                existing.deferred().setResult(conflict);
+                deferred.setResult(conflict);
                 return;
             }
 

@@ -27,9 +27,6 @@ public class TestController {
         @Valid @RequestBody MatchResultDTO dto,
         HttpServletRequest request
     ) {
-        System.out.println("Session ID: " + dto.sessionId());
-        System.out.println(dto);
-
         Player player = (Player) request.getAttribute("player");
         var result = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
 
@@ -37,7 +34,6 @@ public class TestController {
             var okRes = ResponseEntity.status(201).body("Match registered, Code: %s".formatted(dto.sessionId()));
             result.setResult(okRes);
             pendingResults.get(dto.sessionId()).deferred().setResult(okRes);
-            System.out.println("Found pairing result. Status: 201");
             return result;
         } else {
             pendingResults.put(dto.sessionId(), new PendingResult(dto, result));
