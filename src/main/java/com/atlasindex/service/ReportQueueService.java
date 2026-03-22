@@ -14,6 +14,7 @@ import com.atlasindex.model.entities.Player;
 
 @Service
 public class ReportQueueService {
+    public final long REPORT_EXPIRATION_MILIS = 20_000;
     private final MatchService matchService;
     final ConcurrentHashMap<String, PendingReport> pendingReports = new ConcurrentHashMap<>();
 
@@ -50,15 +51,15 @@ public class ReportQueueService {
             existing.deferred().setResult(response);
             deferred.setResult(response);
         } else {
-            pendingReports.put(sessionId, PendingReport.from(dto, sender, deferred));
+            pendingReports.put(sessionId, PendingReport.from(dto, sender, deferred, REPORT_EXPIRATION_MILIS));
         }
     }
 
     /** Stores players match submissions to compare them later on */
     record PendingReport(MatchResultDTO dto, Player player, Instant expiresAt, DeferredResult<ResponseEntity<?>> deferred) {
 
-        public static PendingReport from(MatchResultDTO dto, Player player, DeferredResult<ResponseEntity<?>> deferred) {
-            return new PendingReport(dto, player, Instant.now().plusSeconds(60), deferred);
+        public static PendingReport from(MatchResultDTO dto, Player player, DeferredResult<ResponseEntity<?>> deferred, long expirationMilis) {
+            return new PendingReport(dto, player, Instant.now().plusMillis(expirationMilis), deferred);
         }
         
     }

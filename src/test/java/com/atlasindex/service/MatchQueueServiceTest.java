@@ -121,7 +121,7 @@ public class MatchQueueServiceTest {
         var p2 = new Player();
         p2.setId(200L);
         var expiredReport = PendingReport.from(
-            buildDTO("session-2", 1), p2, deferred);
+            buildDTO("session-2", 1), p2, deferred, service.REPORT_EXPIRATION_MILIS);
         
         service.pendingReports.put("session-2", expiredReport);
         service.clearExpiredReports();
