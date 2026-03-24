@@ -22,6 +22,7 @@ import com.atlasindex.model.dto.MoonCharDTO;
 import com.atlasindex.model.entities.Player;
 import com.atlasindex.model.enums.GameChar;
 import com.atlasindex.model.enums.Moon;
+import com.atlasindex.model.enums.SenderRole;
 import com.atlasindex.service.ReportQueueService.PendingReport;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,9 +34,11 @@ public class ReportQueueServiceTest {
     private ReportQueueService service;
 
     // Helper
-    private MatchResultDTO buildDTO(String sessionId, int senderPosition) {
+    private MatchResultDTO buildDTO(String sessionId, SenderRole senderRole) {
+        int hostPosition = senderRole == SenderRole.HOST ? 1 : 2;
         return new MatchResultDTO(
-            senderPosition,
+            senderRole,
+            hostPosition,
             new MoonCharDTO(
                 GameChar.ARC, Moon.CRESCENT, 2
             ),
@@ -51,7 +54,7 @@ public class ReportQueueServiceTest {
 
     @Test
     void firstReport_isQueued_matchServiceNotCalled() {
-        var dto = buildDTO("session-1", 1);
+        var dto = buildDTO("session-1", SenderRole.HOST);
         var p1 = new Player();
         p1.setId(100L);
 
@@ -63,10 +66,10 @@ public class ReportQueueServiceTest {
     @Test
     void secordReport_sameSession_triggersMatchService() {
         var session = "session-1";
-        var dto1 = buildDTO(session, 1);
+        var dto1 = buildDTO(session, SenderRole.HOST);
         var p1 = new Player();
         p1.setId(100L);
-        var dto2 = buildDTO(session, 2);
+        var dto2 = buildDTO(session, SenderRole.CLIENT);
         var p2 = new Player();
         p2.setId(200L);
         var deferred = new DeferredResult<ResponseEntity<?>>(10_000L, ResponseEntity.status(408).build());
@@ -83,10 +86,10 @@ public class ReportQueueServiceTest {
         var session1 = "session-1";
         var session2 = "session-2";
 
-        var dto1 = buildDTO(session1, 1);
+        var dto1 = buildDTO(session1, SenderRole.HOST);
         var p1 = new Player();
         p1.setId(100L);
-        var dto2 = buildDTO(session2, 1);
+        var dto2 = buildDTO(session2, SenderRole.CLIENT);
         var p2 = new Player();
         p2.setId(200L);
 
@@ -106,7 +109,7 @@ public class ReportQueueServiceTest {
         var p2 = new Player();
         p2.setId(200L);
         var expiredReport = new PendingReport(
-            buildDTO("session-1", 1), 
+            buildDTO("session-1", SenderRole.CLIENT), 
             p2, Instant.now().minusSeconds(60), deferred);
         
         service.pendingReports.put("session-1", expiredReport);
@@ -121,7 +124,7 @@ public class ReportQueueServiceTest {
         var p2 = new Player();
         p2.setId(200L);
         var expiredReport = PendingReport.from(
-            buildDTO("session-2", 1), p2, deferred, service.REPORT_EXPIRATION_MILIS);
+            buildDTO("session-2", SenderRole.CLIENT), p2, deferred, service.REPORT_EXPIRATION_MILIS);
         
         service.pendingReports.put("session-2", expiredReport);
         service.clearExpiredReports();

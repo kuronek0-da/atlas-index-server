@@ -14,4 +14,7 @@ public record MoonCharDTO(
     @NotNull
     int score
 ) {
+    public boolean isWinner(MoonCharDTO opponent) {
+        return score > opponent.score;
+    }
 }

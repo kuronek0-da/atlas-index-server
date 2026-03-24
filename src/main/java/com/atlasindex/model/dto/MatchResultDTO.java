@@ -1,15 +1,15 @@
 package com.atlasindex.model.dto;
 
+import com.atlasindex.model.enums.SenderRole;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record MatchResultDTO(
-    @Min(value = 1)
-    @Max(value = 2)
     @NotNull
-    Integer senderPosition,
+    SenderRole senderRole,
+    Integer hostPosition,
     @Valid
     @NotNull
     MoonCharDTO p1,
