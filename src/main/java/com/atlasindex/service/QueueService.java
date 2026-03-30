@@ -13,7 +13,8 @@ import com.atlasindex.model.dto.QueueResponseDTO;
 
 @Service
 public class QueueService {
-    public final long QUEUE_EXPIRATION_MILIS = 60_000; // 5 mins
+    // 5 minutes
+    public final long QUEUE_EXPIRATION_MILIS = 300_000;
     final ConcurrentHashMap<String, PendingHost> pendingHosts = new ConcurrentHashMap<>();
 
     @Scheduled(fixedRate = 10000) // 10s
