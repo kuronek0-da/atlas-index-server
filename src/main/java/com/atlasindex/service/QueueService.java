@@ -1,6 +1,8 @@
 package com.atlasindex.service;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.QueueResponseDTO;
+import com.atlasindex.model.entities.Player;
 
 @Service
 public class QueueService {
@@ -21,6 +24,12 @@ public class QueueService {
     void clearExpiredReports() {
         pendingHosts.entrySet()
                 .removeIf(entry -> entry.getValue().expiresAt().isBefore(Instant.now()));
+    }
+
+    public List<Map<String,String>> getQueue() {
+        return pendingHosts.entrySet().stream()
+            .map(e -> Map.of(e.getKey(), e.getValue().discordUsername()))
+            .toList();
     }
 
     public void joinQueue(String discordUsername, String sessionId, DeferredResult<ResponseEntity<?>> deferred) {
@@ -52,5 +61,9 @@ public class QueueService {
         public static PendingHost from(String discordUsername, DeferredResult<ResponseEntity<?>> result, long expiration_milis) {
             return new PendingHost(discordUsername, result, Instant.now().plusMillis(expiration_milis));
         }
+    }
+
+    public void cancelQueue(Player player) {
+        pendingHosts.entrySet().removeIf(e -> e.getValue().discordUsername().equals(player.getDiscordUsername()));
     }
 }
