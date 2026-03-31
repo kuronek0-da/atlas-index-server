@@ -1,7 +1,12 @@
 package com.atlasindex.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +21,7 @@ import com.atlasindex.service.QueueService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
+
 @RestController
 @RequestMapping("api/queue")
 public class QueueController {
@@ -23,6 +29,11 @@ public class QueueController {
 
     public QueueController(QueueService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Map<String,String>>> getQueue() {
+        return ResponseEntity.ok(service.getQueue());
     }
 
     @PostMapping
@@ -45,5 +56,12 @@ public class QueueController {
 
         service.matchInQueue(player.getDiscordUsername(), sessionId, result);
         return result;
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> cancelQueue(HttpServletRequest request) {
+        var player = (Player) request.getAttribute("player");
+        service.cancelQueue(player);
+        return ResponseEntity.ok("Queue cancelled");
     }
 }
