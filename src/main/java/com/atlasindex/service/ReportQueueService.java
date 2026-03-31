@@ -11,6 +11,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.atlasindex.model.dto.MatchResultDTO;
 import com.atlasindex.model.entities.Player;
+import com.atlasindex.model.enums.SenderRole;
 
 @Service
 public class ReportQueueService {
@@ -26,7 +27,7 @@ public class ReportQueueService {
     void clearExpiredReports() {
         var now = Instant.now();
         pendingReports.entrySet()
-            .removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
+                .removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
     }
 
     public void reportMatch(MatchResultDTO dto, Player sender, DeferredResult<ResponseEntity<?>> deferred) {
@@ -43,34 +44,93 @@ public class ReportQueueService {
                 return;
             }
 
-            if (dto.senderPosition() == existing.dto().senderPosition()) {
+            if (dto.senderRole() == existing.dto().senderRole()) {
                 var conflict = ResponseEntity.status(HttpStatus.CONFLICT).build();
                 existing.deferred().setResult(conflict);
                 deferred.setResult(conflict);
                 return;
             }
 
-            // sender pos == 1 -> sender is P1
-            if (dto.senderPosition() == 1) {
-                matchService.registerMatch(dto, sender, existing.player());
-            } else {
-                matchService.registerMatch(dto, existing.player(), sender);
+            validateReports(dto, existing.dto());
+            boolean senderIsWinner = false;
+            // Host holds the player position
+            if (dto.senderRole() == SenderRole.HOST && dto.hostPosition() != null) {
+                // Sender is HOST
+                if (dto.hostPosition() == 1) {
+                    // Sender is P1
+                    matchService.registerMatch(dto, sender, existing.player());
+                    senderIsWinner = dto.p1().isWinner(existing.dto().p2());
+                } else {
+                    // Sender is P2
+                    matchService.registerMatch(dto, existing.player(), sender);
+                    senderIsWinner = dto.p2().isWinner(existing.dto().p1());
+                }
+            } else if (existing.dto().senderRole() == SenderRole.HOST && existing.dto().hostPosition() != null) {
+                // Existing is HOST
+                if (existing.dto().hostPosition() == 1) {
+                    // Existing is P1
+                    matchService.registerMatch(existing.dto(), existing.player(), sender);
+                    senderIsWinner = dto.p2().isWinner(existing.dto().p1());
+                } else {
+                    // Existing is P2
+                    matchService.registerMatch(existing.dto(), sender, existing.player());
+                    senderIsWinner = dto.p1().isWinner(existing.dto().p2());
+                }
             }
-            var response = ResponseEntity.status(HttpStatus.CREATED).body("Match registered");
+            var response = ResponseEntity.status(HttpStatus.CREATED);
+            String senderPlayerMessage;
+            String existingPlayerMessage;
+            String senderName = sender.getDiscordUsername();
+            String existingName = existing.player().getDiscordUsername();
 
-            existing.deferred().setResult(response);
-            deferred.setResult(response);
+            if (senderIsWinner) {
+                senderPlayerMessage = "Won against " + existingName;
+                existingPlayerMessage = "Lost against " + senderName;
+            } else {
+                senderPlayerMessage = "Lost against " + existingName;
+                existingPlayerMessage = "Won against " + senderName;
+            }
+
+            existing.deferred().setResult(response.body(existingPlayerMessage));
+            deferred.setResult(response.body(senderPlayerMessage)); // sender response
         } else {
             pendingReports.put(sessionId, PendingReport.from(dto, sender, deferred, REPORT_EXPIRATION_MILIS));
         }
     }
 
-    /** Stores players match submissions to compare them later on */
-    record PendingReport(MatchResultDTO dto, Player player, Instant expiresAt, DeferredResult<ResponseEntity<?>> deferred) {
+    /**
+     * Checks if results match
+     * 
+     * @param sender   the last paired result received by the server
+     * @param existing the first paired result received by the server
+     */
+    private void validateReports(MatchResultDTO sender, MatchResultDTO existing) {
+        if (sender.senderRole() == existing.senderRole()) {
+            throw new RuntimeException("Paired results contain the same sender role");
+        }
+        if (sender.senderRole() == SenderRole.HOST && sender.hostPosition() == null) {
+            throw new RuntimeException("Host must contain player position");
+        }
+        if (existing.senderRole() == SenderRole.HOST && existing.hostPosition() == null) {
+            throw new RuntimeException("Host must contain player position");
+        }
+        if (Math.abs(sender.realTimer() - existing.realTimer()) >= 240) {
+            // 10s difference
+            throw new RuntimeException("Paired results timers don't match.");
+        }
+        if (!sender.p1().equals(existing.p1()) || !sender.p2().equals(existing.p2())) {
+            throw new RuntimeException("Paired results characters don't match");
+        }
+    }
 
-        public static PendingReport from(MatchResultDTO dto, Player player, DeferredResult<ResponseEntity<?>> deferred, long expirationMilis) {
+    /** Stores players match submissions to compare them later on */
+    record PendingReport(MatchResultDTO dto, Player player, Instant expiresAt,
+            DeferredResult<ResponseEntity<?>> deferred) {
+
+        public static PendingReport from(MatchResultDTO dto, Player player, DeferredResult<ResponseEntity<?>> deferred,
+                long expirationMilis) {
             return new PendingReport(dto, player, Instant.now().plusMillis(expirationMilis), deferred);
         }
-        
+
     }
 }

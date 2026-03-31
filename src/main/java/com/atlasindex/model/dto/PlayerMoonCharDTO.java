@@ -10,5 +10,4 @@ public record PlayerMoonCharDTO(
     Moon moon,
     int score
 ) {
-    
 }
