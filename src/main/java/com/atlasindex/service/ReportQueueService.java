@@ -3,6 +3,8 @@ package com.atlasindex.service;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +17,9 @@ import com.atlasindex.model.enums.SenderRole;
 
 @Service
 public class ReportQueueService {
-    public final long REPORT_EXPIRATION_MILIS = 20_000;
+    private static final Logger log = LoggerFactory.getLogger(ReportQueueService.class);
+
+    public final long REPORT_EXPIRATION_MILIS = 30_000;
     private final MatchService matchService;
     final ConcurrentHashMap<String, PendingReport> pendingReports = new ConcurrentHashMap<>();
 
@@ -35,7 +39,7 @@ public class ReportQueueService {
         var existing = pendingReports.remove(sessionId);
 
         if (existing != null) {
-            // Second report has arrived
+            // Second report
 
             if (existing.player().getId() == sender.getId()) {
                 var conflict = ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -93,8 +97,12 @@ public class ReportQueueService {
 
             existing.deferred().setResult(response.body(existingPlayerMessage));
             deferred.setResult(response.body(senderPlayerMessage)); // sender response
+
+            log.info("Match paired: [%s]", sessionId);
         } else {
+            // First match report
             pendingReports.put(sessionId, PendingReport.from(dto, sender, deferred, REPORT_EXPIRATION_MILIS));
+            log.debug("Match added to queue: [%s]", sessionId);
         }
     }
 
