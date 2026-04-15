@@ -1,10 +1,12 @@
 package com.atlasindex.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+
+import jakarta.validation.constraints.NotEmpty;
 
 public record QueueRequestDTO(
-    @NotBlank
-    String sessionId
+    @NotEmpty
+    List<String> sessionIds
 ) {
     
 }

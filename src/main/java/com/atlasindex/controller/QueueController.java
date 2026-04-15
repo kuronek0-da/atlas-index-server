@@ -1,13 +1,11 @@
 package com.atlasindex.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +30,7 @@ public class QueueController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String,String>>> getQueue() {
+    public ResponseEntity<List<String>> getQueue() {
         return ResponseEntity.ok(service.getQueue());
     }
 
@@ -41,27 +39,27 @@ public class QueueController {
             @RequestBody @Valid QueueRequestDTO queueRequest,
             HttpServletRequest request) {
         var player = (Player) request.getAttribute("player");
-        var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
-        service.joinQueue(player.getDiscordUsername(), queueRequest.sessionId(), result);
+        var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILLIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
+        service.joinQueue(player.getDiscordUsername(), queueRequest.sessionIds(), result);
         return result;
     }
 
-    @PostMapping("/{sessionId}")
-    public DeferredResult<ResponseEntity<?>> matchQueue(
-        @PathVariable String sessionId,
-        HttpServletRequest request
-    ) {
-        var player = (Player) request.getAttribute("player");
-        var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
+    // @PostMapping("/{sessionId}")
+    // public DeferredResult<ResponseEntity<?>> matchQueue(
+    //     @PathVariable List<String> sessionIds,
+    //     HttpServletRequest request
+    // ) {
+    //     var player = (Player) request.getAttribute("player");
+    //     var result = new DeferredResult<ResponseEntity<?>>(service.QUEUE_EXPIRATION_MILLIS, ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
 
-        service.matchInQueue(player.getDiscordUsername(), sessionId, result);
-        return result;
-    }
+    //     service.matchInQueue(player.getDiscordUsername(), sessionIds, result);
+    //     return result;
+    // }
 
     @DeleteMapping
     public ResponseEntity<?> cancelQueue(HttpServletRequest request) {
         var player = (Player) request.getAttribute("player");
         service.cancelQueue(player);
-        return ResponseEntity.ok("Queue cancelled");
+        return ResponseEntity.ok("Queue canceled");
     }
 }
